@@ -9,10 +9,8 @@ cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
 
 [phases.build]
 cmds = [
-  "php artisan key:generate --force || true",
-  "php artisan config:cache || true",
-  "php artisan route:cache || true"
+  "php artisan key:generate --force || true"
 ]
 
 [start]
-cmd = "php artisan migrate --force && php -S 0.0.0.0:$PORT -t public public/index.php"
+cmd = "php artisan migrate --force --seed && php artisan config:clear && php -S 0.0.0.0:$PORT -t public public/index.php"
