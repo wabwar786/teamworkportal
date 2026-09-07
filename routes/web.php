@@ -13,6 +13,18 @@ use App\Http\Controllers\Portal\SupportController;
 use App\Http\Controllers\Portal\TaskController;
 use Illuminate\Support\Facades\Route;
 
+// Public build marker — open /__version to confirm which code is live.
+// If this shows the tag below, the latest code (with search + chat) is deployed.
+Route::get('/__version', function () {
+    return response()->json([
+        'app' => 'Wabwar Vault',
+        'build' => '2026-09-07-search-chat-oversight',
+        'has_search' => Route::has('portal.search'),
+        'has_messages' => Route::has('portal.messages'),
+        'has_oversight' => Route::has('portal.messages.all'),
+    ]);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Member side — NO login. Employee picks their name.
