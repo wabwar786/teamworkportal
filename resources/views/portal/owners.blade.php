@@ -13,13 +13,15 @@
     @endforeach</div>
   <div class="tier"><h4>Heads ({{ $heads->count() }})</h4>
     @forelse($heads as $o)
+    @forelse($heads as $o)
+      @php $teamCount = $employees->where('head_id', $o->id)->count(); @endphp
       <div class="person-row"><span class="avatar">{{ strtoupper(substr($o->name,0,2)) }}</span>
         <div class="pd"><b>{{ $o->name }}</b><span>{{ $o->email }}</span>
           <div class="scopes" style="margin-top:5px">@foreach($o->scopes ?? [] as $s)<span class="scope">{{ $s }}</span>@endforeach</div></div>
         <div style="text-align:right">
-          <span class="tag tag-gray">{{ $employees->where('head_id',$o->id)->count() }} team</span>
+          <span class="tag tag-gray">{{ $teamCount }} team</span>
           <button class="btn btn-sm btn-ghost-red" style="margin-top:6px"
-            onclick='delHead(@json(["id"=>$o->id,"name"=>$o->name,"team"=>$employees->where("head_id",$o->id)->count()]))'>Delete</button>
+            onclick='delHead(@json(["id"=>$o->id,"name"=>$o->name,"team"=>$teamCount]))'>Delete</button>
         </div></div>
     @empty
       <div style="color:var(--ink-3);padding:8px">No heads yet.</div>
