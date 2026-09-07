@@ -42,7 +42,7 @@ button:hover{background:#0F4E3E}
     <button type="submit">Sign in</button>
   </form>
   <a class="member-link" href="{{ route('member.start') }}">I'm a team member →</a>
-  <div class="foot">Demo: admin@wabwar.com / password<br>Head: tariq@wabwar.com / password</div>
+  
 </div>
 </body>
 </html>
