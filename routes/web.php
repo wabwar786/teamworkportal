@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Portal\AuthController;
+use App\Http\Controllers\Portal\ChatController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\DeviceController;
 use App\Http\Controllers\Portal\EmployeeController;
 use App\Http\Controllers\Portal\MemberController;
+use App\Http\Controllers\Portal\MessageController;
 use App\Http\Controllers\Portal\OwnerController;
 use App\Http\Controllers\Portal\SupportController;
 use App\Http\Controllers\Portal\TaskController;
@@ -21,6 +23,12 @@ Route::get('/my-day', [MemberController::class, 'day'])->name('member.day');
 Route::post('/my-day/save', [MemberController::class, 'save'])->name('member.save');
 Route::post('/my-day/task/{task}/done', [MemberController::class, 'completeTask'])->name('member.task.done');
 Route::post('/leave', [MemberController::class, 'leave'])->name('member.leave');
+
+// Member team chat (session-based)
+Route::get('/my-day/chat/contacts', [ChatController::class, 'contacts'])->name('member.chat.contacts');
+Route::get('/my-day/chat/thread/{kind}/{id}', [ChatController::class, 'thread'])->name('member.chat.thread')->whereIn('kind', ['owner', 'emp']);
+Route::post('/my-day/chat/send', [ChatController::class, 'send'])->name('member.chat.send');
+Route::get('/my-day/chat/poll', [ChatController::class, 'poll'])->name('member.chat.poll');
 
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +74,13 @@ Route::middleware('auth:web')->prefix('portal')->name('portal.')->group(function
     Route::post('/support/{conversation}/reply', [SupportController::class, 'reply'])->name('support.reply');
     Route::get('/scripts', [SupportController::class, 'scripts'])->name('scripts');
     Route::post('/scripts/client', [SupportController::class, 'addClient'])->name('scripts.client');
+
+    // Team messages (owner/head <-> member and owner <-> owner)
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages');
+    Route::get('/messages/contacts', [MessageController::class, 'contacts'])->name('messages.contacts');
+    Route::get('/messages/thread/{kind}/{id}', [MessageController::class, 'thread'])->name('messages.thread')->whereIn('kind', ['owner', 'emp']);
+    Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
+    Route::get('/messages/poll', [MessageController::class, 'poll'])->name('messages.poll');
 
     // Employees (add / edit / archive-delete / restore)
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees');

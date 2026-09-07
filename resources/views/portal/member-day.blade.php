@@ -60,8 +60,17 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
   <div class="av">{{ $emp->initials() }}</div>
   <div class="who"><b>{{ $emp->name }}</b><span>{{ $emp->role }}</span></div>
   <span class="tag tag-green" id="savedTag">Saved {{ optional($log->saved_at)->format('g:i A') }}</span>
-  <form method="POST" action="{{ route('member.leave') }}" style="margin-left:auto">@csrf<button class="btn">Not me / switch</button></form>
+  <button class="btn" id="chatOpenBtn" onclick="Chat.open()" style="margin-left:auto;position:relative">
+    <span>💬</span> Chat <span class="chat-badge hide" id="chatBadge">0</span></button>
+  <form method="POST" action="{{ route('member.leave') }}">@csrf<button class="btn">Not me / switch</button></form>
 </div>
+
+@include('portal.partials.chat', [
+  'base' => url('my-day/chat'),
+  'sendUrl' => route('member.chat.send'),
+  'contactsUrl' => route('member.chat.contacts'),
+  'pollUrl' => route('member.chat.poll'),
+])
 
 <div class="wrap">
   @if($isOff)

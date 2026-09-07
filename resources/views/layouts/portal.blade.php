@@ -199,6 +199,9 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
         'SUPPORT' => [
           ['portal.support','Inbox','✉'], ['portal.scripts','Widgets & scripts','⟨⟩'],
         ],
+        'TEAM' => [
+          ['portal.messages','Messages','❝'],
+        ],
         'ADMIN' => [
           ['portal.employees','Employees','⚇'], ['portal.owners','Owners & heads','♦'],
         ],
