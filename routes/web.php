@@ -63,6 +63,7 @@ Route::middleware('auth:web')->prefix('portal')->name('portal.')->group(function
     Route::get('/analyze', [DashboardController::class, 'analyze'])->name('analyze');
     Route::get('/full-log', [DashboardController::class, 'fullLog'])->name('log');
     Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::get('/search/live', [SearchController::class, 'live'])->name('search.live');
 
     // Tasks + messaging
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');

@@ -47,6 +47,16 @@ a{color:inherit;text-decoration:none}
 .search{flex:1;max-width:440px;position:relative}
 .search input{width:100%;border:1px solid var(--line-2);background:var(--card-2);border-radius:var(--r);padding:8px 12px 8px 30px;font-size:13px}
 .search::before{content:"⌕";position:absolute;left:10px;top:5px;font-size:16px;color:var(--ink-3)}
+.search-dd{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--line-2);border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.14);max-height:440px;overflow-y:auto;z-index:30;display:none}
+.search-dd.on{display:block}
+.sdd-sec{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:8px 12px 3px;background:var(--card-2);position:sticky;top:0}
+.sdd-row{display:block;padding:8px 12px;border-bottom:1px solid var(--line)}
+.sdd-row:hover{background:var(--card-2)}
+.sdd-row b{font-size:13px;font-weight:500;display:block}
+.sdd-row span{font-size:11px;color:var(--ink-3);font-family:var(--mono);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sdd-all{display:block;text-align:center;padding:9px;font-size:12.5px;color:var(--green);font-weight:500;border-top:1px solid var(--line)}
+.sdd-all:hover{background:var(--green-soft)}
+.sdd-empty{padding:14px 12px;color:var(--ink-3);font-size:13px;text-align:center}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:9px}
 .who{text-align:right;line-height:1.2}.who b{font-size:13px;font-weight:600;display:block}.who span{font-size:11px;color:var(--ink-3);font-family:var(--mono)}
 .shell{min-height:calc(100vh - 52px);display:grid;grid-template-columns:216px 1fr}
@@ -174,7 +184,10 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
 @php $u = auth()->user(); @endphp
 <div class="topbar">
   <div class="brand-mini"><div class="brand-mark"></div><b>Wabwar Vault</b></div>
-  <form class="search" method="GET" action="{{ route('portal.search') }}"><input name="q" value="{{ request('q') }}" placeholder="Search everything…" autocomplete="off"></form>
+  <form class="search" method="GET" action="{{ route('portal.search') }}">
+    <input name="q" id="globalSearchInput" value="{{ request('q') }}" placeholder="Search everything…" autocomplete="off">
+    <div class="search-dd" id="searchDD"></div>
+  </form>
   <div class="topbar-right">
     <span class="tag {{ $u->isSuper() ? 'tag-green' : 'tag-purple' }}">{{ $u->isSuper() ? 'Super owner' : 'Head' }}</span>
     <div class="who"><b>{{ $u->name }}</b><span>{{ $u->email }}</span></div>
@@ -238,9 +251,11 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
   (function(){
     const nav = document.getElementById('msgNav');
     if(!nav) return;
+    @php $msgPollUrl = route('portal.messages.poll'); @endphp
+    const POLL_URL = @json($msgPollUrl);
     async function tick(){
       try{
-        const r = await fetch(@json(route('portal.messages.poll')), {headers:{'Accept':'application/json'}});
+        const r = await fetch(POLL_URL, {headers:{'Accept':'application/json'}});
         if(!r.ok) return;
         const d = await r.json();
         if(d.total>0){ nav.textContent=d.total; nav.classList.remove('hide'); }
@@ -248,6 +263,54 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
       }catch(e){}
     }
     tick(); setInterval(tick, 6000);
+  })();
+
+  // Live type-ahead search — results appear as you type
+  @php $liveUrl = route('portal.search.live'); $fullUrl = route('portal.search'); @endphp
+  (function(){
+    const si = document.getElementById('globalSearchInput');
+    const dd = document.getElementById('searchDD');
+    if(!si || !dd) return;
+    const LIVE = @json($liveUrl);
+    const FULL = @json($fullUrl);
+    let timer=null, lastQ='';
+    function esc(s){const d=document.createElement('div');d.textContent=(s??'');return d.innerHTML;}
+    async function run(q){
+      try{
+        const r = await fetch(LIVE + '?q=' + encodeURIComponent(q), {headers:{'Accept':'application/json'}});
+        if(!r.ok) return;
+        const d = await r.json();
+        if(si.value.trim() !== d.q) return; // stale response
+        render(d);
+      }catch(e){}
+    }
+    function render(d){
+      if(!d.groups || !d.groups.length){
+        dd.innerHTML='<div class="sdd-empty">No matches for "'+esc(d.q)+'"</div>';
+        dd.classList.add('on'); return;
+      }
+      let h='';
+      d.groups.forEach(g=>{
+        h += '<div class="sdd-sec">'+esc(g.label)+'</div>';
+        g.items.forEach(it=>{
+          h += '<a class="sdd-row" href="'+it.url+'"><b>'+esc(it.title)+'</b>'
+            + (it.sub ? '<span>'+esc(it.sub)+'</span>' : '') + '</a>';
+        });
+      });
+      h += '<a class="sdd-all" href="'+FULL+'?q='+encodeURIComponent(d.q)+'">See all results →</a>';
+      dd.innerHTML=h; dd.classList.add('on');
+    }
+    si.addEventListener('input', ()=>{
+      const q = si.value.trim();
+      clearTimeout(timer);
+      if(q.length < 1){ dd.classList.remove('on'); dd.innerHTML=''; return; }
+      if(q === lastQ){ dd.classList.add('on'); return; }
+      lastQ = q;
+      timer = setTimeout(()=>run(q), 200);
+    });
+    si.addEventListener('focus', ()=>{ if(dd.innerHTML.trim()) dd.classList.add('on'); });
+    si.addEventListener('keydown', e=>{ if(e.key==='Escape') dd.classList.remove('on'); });
+    document.addEventListener('click', e=>{ if(!e.target.closest('.search')) dd.classList.remove('on'); });
   })();
   @yield('scripts')
 </script>
