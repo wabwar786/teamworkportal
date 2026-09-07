@@ -2,7 +2,8 @@
 @section('title','Messages')
 
 @section('content')
-<div class="sechead"><h2>Team messages</h2><p>Chat with members and other owners — text and images, all saved</p></div>
+<div class="sechead"><h2>Team messages</h2><p>Chat with members and other owners — text and images, all saved</p>
+  @if($u->isSuper())<a class="btn btn-sm" style="margin-left:auto" href="{{ route('portal.messages.all') }}">See all team messages →</a>@endif</div>
 
 <div style="max-width:520px">
   <div class="panel"><div class="panel-body" style="text-align:center;padding:26px">

@@ -57,6 +57,7 @@ a{color:inherit;text-decoration:none}
 .nav-item:hover{background:#E4E6E0}
 .nav-item.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line-2)}
 .nav-item .ico{width:16px;text-align:center;flex:none;font-size:13px;opacity:.75}
+.nav-badge{margin-left:auto;background:#9E3229;color:#fff;font-family:var(--mono);font-size:10px;border-radius:9px;padding:1px 6px}
 .page{padding:20px 22px 60px}
 .sechead{display:flex;align-items:center;gap:10px;margin:4px 0 14px;flex-wrap:wrap}
 .sechead h2{font-size:18px;font-weight:600;letter-spacing:-.01em}.sechead p{font-size:12.5px;color:var(--ink-2)}
@@ -173,7 +174,7 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
 @php $u = auth()->user(); @endphp
 <div class="topbar">
   <div class="brand-mini"><div class="brand-mark"></div><b>Wabwar Vault</b></div>
-  <form class="search" method="GET" action="#" onsubmit="return false"><input placeholder="Search everything…"></form>
+  <form class="search" method="GET" action="{{ route('portal.search') }}"><input name="q" value="{{ request('q') }}" placeholder="Search everything…" autocomplete="off"></form>
   <div class="topbar-right">
     <span class="tag {{ $u->isSuper() ? 'tag-green' : 'tag-purple' }}">{{ $u->isSuper() ? 'Super owner' : 'Head' }}</span>
     <div class="who"><b>{{ $u->name }}</b><span>{{ $u->email }}</span></div>
@@ -200,7 +201,7 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
           ['portal.support','Inbox','✉'], ['portal.scripts','Widgets & scripts','⟨⟩'],
         ],
         'TEAM' => [
-          ['portal.messages','Messages','❝'],
+          ['portal.messages','Messages','❝','msgNav'],
         ],
         'ADMIN' => [
           ['portal.employees','Employees','⚇'], ['portal.owners','Owners & heads','♦'],
@@ -210,10 +211,12 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
     @endphp
     @foreach($nav as $group => $items)
       <div class="side-group"><h4>{{ $group }}</h4>
-        @foreach($items as [$route,$label,$icon])
+        @foreach($items as $item)
+          @php [$route,$label,$icon] = $item; $badgeId = $item[3] ?? null; @endphp
           @if($route === 'portal.owners' && ! $u->isSuper()) @continue @endif
-          <a class="nav-item {{ $current === $route ? 'on' : '' }}" href="{{ route($route) }}">
-            <span class="ico">{{ $icon }}</span>{{ $label }}</a>
+          <a class="nav-item {{ $current === $route ? 'on' : '' }}" href="{{ route($route) }}" style="position:relative">
+            <span class="ico">{{ $icon }}</span>{{ $label }}
+            @if($badgeId)<span id="{{ $badgeId }}" class="nav-badge hide">0</span>@endif</a>
         @endforeach
       </div>
     @endforeach
@@ -230,6 +233,22 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
   const t=document.getElementById('toast'); if(t) setTimeout(()=>t.remove(),2600);
   // attach CSRF to fetch if needed later
   window.CSRF = document.querySelector('meta[name=csrf-token]').content;
+
+  // Global unread badge on the Messages nav item — polls from every portal page
+  (function(){
+    const nav = document.getElementById('msgNav');
+    if(!nav) return;
+    async function tick(){
+      try{
+        const r = await fetch(@json(route('portal.messages.poll')), {headers:{'Accept':'application/json'}});
+        if(!r.ok) return;
+        const d = await r.json();
+        if(d.total>0){ nav.textContent=d.total; nav.classList.remove('hide'); }
+        else nav.classList.add('hide');
+      }catch(e){}
+    }
+    tick(); setInterval(tick, 6000);
+  })();
   @yield('scripts')
 </script>
 </body>

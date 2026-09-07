@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\EmployeeController;
 use App\Http\Controllers\Portal\MemberController;
 use App\Http\Controllers\Portal\MessageController;
 use App\Http\Controllers\Portal\OwnerController;
+use App\Http\Controllers\Portal\SearchController;
 use App\Http\Controllers\Portal\SupportController;
 use App\Http\Controllers\Portal\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,7 @@ Route::middleware('auth:web')->prefix('portal')->name('portal.')->group(function
     Route::get('/today', [DashboardController::class, 'today'])->name('today');
     Route::get('/analyze', [DashboardController::class, 'analyze'])->name('analyze');
     Route::get('/full-log', [DashboardController::class, 'fullLog'])->name('log');
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
 
     // Tasks + messaging
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
@@ -92,6 +94,7 @@ Route::middleware('auth:web')->prefix('portal')->name('portal.')->group(function
 
     // Owners & heads (super only)
     Route::middleware('tier:super')->group(function () {
+        Route::get('/messages/all', [MessageController::class, 'allMessages'])->name('messages.all');
         Route::get('/owners', [OwnerController::class, 'index'])->name('owners');
         Route::post('/owners', [OwnerController::class, 'store'])->name('owners.store');
         Route::put('/owners/{owner}', [OwnerController::class, 'update'])->name('owners.update');

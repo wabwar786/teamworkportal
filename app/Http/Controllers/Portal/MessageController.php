@@ -26,6 +26,38 @@ class MessageController extends Controller
         return view('portal.messages');
     }
 
+    /**
+     * Super-admin oversight: every message in the system, newest first, with
+     * both participants' names resolved. Route is restricted to tier:super.
+     */
+    public function allMessages(Request $request)
+    {
+        $owners = Owner::pluck('name', 'id');
+        $emps = Employee::pluck('name', 'id');
+
+        $resolve = function ($ref) use ($owners, $emps) {
+            [$k, $id] = array_pad(explode(':', (string) $ref), 2, null);
+            if ($k === 'owner') {
+                return ($owners[$id] ?? 'Owner #'.$id).' · owner';
+            }
+            if ($k === 'emp') {
+                return ($emps[$id] ?? 'Member #'.$id).' · member';
+            }
+            return (string) $ref;
+        };
+
+        $rows = InternalMessage::orderByDesc('id')->limit(400)->get()->map(fn ($m) => [
+            'from' => $resolve($m->from_ref),
+            'to' => $resolve($m->to_ref),
+            'body' => $m->body,
+            'image' => $m->image,
+            'at' => $m->created_at->format('d M Y g:i A'),
+            'read' => (bool) $m->read_at,
+        ]);
+
+        return view('portal.messages-all', ['rows' => $rows, 'total' => $rows->count()]);
+    }
+
     public function contacts(Request $request)
     {
         $meRef = $this->ref($request);
