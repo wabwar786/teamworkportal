@@ -1,0 +1,18 @@
+# Nixpacks build for the Laravel app on Railway.
+providers = ["php"]
+
+[phases.setup]
+nixPkgs = ["php82", "php82Packages.composer", "php82Extensions.pdo_mysql", "php82Extensions.mbstring", "php82Extensions.openssl", "php82Extensions.tokenizer", "php82Extensions.gd"]
+
+[phases.install]
+cmds = ["composer install --no-dev --optimize-autoloader --no-interaction"]
+
+[phases.build]
+cmds = [
+  "php artisan key:generate --force || true",
+  "php artisan config:cache || true",
+  "php artisan route:cache || true"
+]
+
+[start]
+cmd = "php artisan migrate --force && php -S 0.0.0.0:$PORT -t public public/index.php"
