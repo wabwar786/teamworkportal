@@ -14,7 +14,7 @@
   <div class="tier"><h4>Heads ({{ $heads->count() }})</h4>
     @forelse($heads as $o)
       @php $teamCount = $employees->where('head_id', $o->id)->count(); @endphp
-      <div class="person-row"><span class="avatar">{{ strtoupper(substr($o->name,0,2)) }}</span>
+      <div class="person-row" id="owner-{{ $o->id }}"><span class="avatar">{{ strtoupper(substr($o->name,0,2)) }}</span>
         <div class="pd"><b>{{ $o->name }}</b><span>{{ $o->email }}</span>
           <div class="scopes" style="margin-top:5px">@foreach($o->scopes ?? [] as $s)<span class="scope">{{ $s }}</span>@endforeach</div></div>
         <div style="text-align:right">

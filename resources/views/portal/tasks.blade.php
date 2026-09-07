@@ -22,7 +22,7 @@
 <div class="panel" style="margin-top:14px"><div class="panel-head"><h3>All tasks</h3></div>
   <table><thead><tr><th>Task</th><th>Assigned to</th><th>Due</th><th>Status</th></tr></thead><tbody>
     @forelse($tasks as $t)
-      <tr><td>{{ $t->body }}</td><td>{{ $t->employee->name ?? '—' }}</td><td class="mono" style="font-size:11px">{{ $t->due }}</td>
+      <tr id="task-{{ $t->id }}"><td>{{ $t->body }}</td><td>{{ $t->employee->name ?? '—' }}</td><td class="mono" style="font-size:11px">{{ $t->due }}</td>
         <td><span class="tag {{ $t->status==='done'?'tag-green':'tag-red' }}">{{ ucfirst($t->status) }}</span></td></tr>
     @empty
       <tr><td colspan="4" style="color:var(--ink-3);text-align:center;padding:20px">No tasks yet.</td></tr>

@@ -5,7 +5,7 @@
 <div class="sechead"><h2>Devices</h2><span class="tag tag-gray">{{ $devices->count() }} enrolled</span></div>
 <div class="devgrid">
   @forelse($devices as $d)
-    <div class="devcard {{ $d->online?'on':'' }}">
+    <div class="devcard {{ $d->online?'on':'' }}" id="device-{{ $d->id }}">
       <div class="dh"><span class="dotlive {{ $d->online?'dot-on':'dot-off' }}"></span>
         <div style="flex:1"><b>{{ $d->pc_name ?? 'Unknown PC' }}</b><span>{{ optional($d->employee)->name ?? 'Unassigned' }}</span></div>
         <span class="tag {{ $d->online?'tag-green':'tag-gray' }}">{{ $d->online?'Online':'Offline' }}</span></div>

@@ -78,7 +78,9 @@ class SearchController extends Controller
         $groups['Employees'] = $emp->limit($per)->get()->map(fn ($e) => [
             'title' => $e->name,
             'sub' => $e->role.($e->archived ? ' · archived' : ''),
-            'url' => $e->archived ? route('portal.employees.log', $e) : route('portal.employees'),
+            'url' => $e->archived
+                ? route('portal.employees.log', $e)
+                : route('portal.employees').'?hl=emp-'.$e->id,
         ]);
 
         // Work logs
@@ -90,11 +92,15 @@ class SearchController extends Controller
         if ($teamIds !== null) {
             $logs->whereIn('employee_id', $teamIds);
         }
-        $groups['Work logs'] = $logs->latest('log_date')->limit($per)->get()->map(fn ($l) => [
-            'title' => optional($l->employee)->name.' · '.$l->log_date->format('d M Y'),
-            'sub' => $this->snippet($l, $q),
-            'url' => route('portal.log'),
-        ]);
+        $groups['Work logs'] = $logs->latest('log_date')->limit($per)->get()->map(function ($l) {
+            $emp = $l->employee;
+            $arch = ($emp && $emp->archived) ? '&archived=1' : '';
+            return [
+                'title' => optional($emp)->name.' · '.$l->log_date->format('d M Y'),
+                'sub' => $this->snippet($l, request('q', '')),
+                'url' => route('portal.log').'?hl=emp-'.$l->employee_id.$arch,
+            ];
+        });
 
         // Tasks
         $tasks = Task::query()->with('employee')->where('body', 'like', $like);
@@ -104,7 +110,7 @@ class SearchController extends Controller
         $groups['Tasks'] = $tasks->limit($per)->get()->map(fn ($t) => [
             'title' => Str::limit($t->body, 60),
             'sub' => (optional($t->employee)->name ?? '—').' · '.$t->status,
-            'url' => route('portal.tasks'),
+            'url' => route('portal.tasks').'?hl=task-'.$t->id,
         ]);
 
         // Owners (super only)
@@ -114,7 +120,7 @@ class SearchController extends Controller
             })->limit($per)->get()->map(fn ($o) => [
                 'title' => $o->name,
                 'sub' => $o->email.' · '.($o->isSuper() ? 'super' : 'head'),
-                'url' => route('portal.owners'),
+                'url' => route('portal.owners').'?hl=owner-'.$o->id,
             ]);
         }
 
@@ -124,7 +130,7 @@ class SearchController extends Controller
         })->limit($per)->get()->map(fn ($d) => [
             'title' => $d->pc_name ?? 'Unknown PC',
             'sub' => (optional($d->employee)->name ?? 'Unassigned').' · '.($d->os ?? ''),
-            'url' => route('portal.devices'),
+            'url' => route('portal.devices').'?hl=device-'.$d->id,
         ]);
 
         // Support customers
@@ -132,7 +138,7 @@ class SearchController extends Controller
             ->limit($per)->get()->map(fn ($c) => [
                 'title' => $c->name,
                 'sub' => $c->key.' · '.$c->channel,
-                'url' => route('portal.scripts'),
+                'url' => route('portal.scripts').'?hl=client-'.$c->id,
             ]);
 
         // Support chats

@@ -68,6 +68,9 @@ a{color:inherit;text-decoration:none}
 .nav-item.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line-2)}
 .nav-item .ico{width:16px;text-align:center;flex:none;font-size:13px;opacity:.75}
 .nav-badge{margin-left:auto;background:#9E3229;color:#fff;font-family:var(--mono);font-size:10px;border-radius:9px;padding:1px 6px}
+@keyframes hlflash{0%,60%{background:var(--amber-soft)}100%{background:transparent}}
+.hl-flash{animation:hlflash 2.8s ease-out}
+.hl-ring{box-shadow:0 0 0 2px var(--amber),0 0 0 6px var(--amber-soft)!important;border-radius:8px;transition:box-shadow .3s}
 .page{padding:20px 22px 60px}
 .sechead{display:flex;align-items:center;gap:10px;margin:4px 0 14px;flex-wrap:wrap}
 .sechead h2{font-size:18px;font-weight:600;letter-spacing:-.01em}.sechead p{font-size:12.5px;color:var(--ink-2)}
@@ -311,6 +314,21 @@ textarea.box{width:100%;border:1px solid var(--line-2);border-radius:var(--r);ba
     si.addEventListener('focus', ()=>{ if(dd.innerHTML.trim()) dd.classList.add('on'); });
     si.addEventListener('keydown', e=>{ if(e.key==='Escape') dd.classList.remove('on'); });
     document.addEventListener('click', e=>{ if(!e.target.closest('.search')) dd.classList.remove('on'); });
+  })();
+  // Highlight the item that a search result pointed to (?hl=elementId)
+  (function(){
+    const hl = new URLSearchParams(location.search).get('hl');
+    if(!hl) return;
+    const el = document.getElementById(hl);
+    if(!el) return;
+    setTimeout(function(){
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      const isRow = el.tagName === 'TR';
+      el.classList.add(isRow ? 'hl-flash' : 'hl-ring');
+      if(!isRow) el.classList.add('hl-flash');
+      setTimeout(function(){ el.classList.remove('hl-ring'); }, 3200);
+      setTimeout(function(){ el.classList.remove('hl-flash'); }, 3000);
+    }, 300);
   })();
   @yield('scripts')
 </script>

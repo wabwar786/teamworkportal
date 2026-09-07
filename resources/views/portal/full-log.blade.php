@@ -6,7 +6,7 @@
     <input class="cx" type="checkbox" name="archived" value="1" {{ $includeArchived?'checked':'' }} onchange="this.form.submit()">
     Include archived employees</label></form></div>
 @forelse($employees as $emp)
-  <div class="panel" style="margin-bottom:13px">
+  <div class="panel" id="emp-{{ $emp->id }}" style="margin-bottom:13px">
     <div class="panel-head"><span class="avatar" style="width:24px;height:24px;font-size:10px">{{ $emp->initials() }}</span>
       <h3>{{ $emp->name }}</h3><span class="tag tag-gray">{{ $emp->role }}</span>
       @if($emp->archived)<span class="tag tag-amber">Archived</span>@endif

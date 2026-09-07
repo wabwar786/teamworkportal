@@ -10,7 +10,7 @@
         <select class="input" name="channel" style="width:auto"><option value="web">Web</option><option value="desktop">Desktop</option><option value="both">Both</option></select>
         <button class="btn btn-primary" type="submit">Add</button></form>
       @foreach($clients as $c)
-        <button class="togrow" style="width:100%;text-align:left;border:none;background:none" onclick="pick('{{ $c->key }}','{{ $c->name }}','{{ $c->channel }}')">
+        <button class="togrow" id="client-{{ $c->id }}" style="width:100%;text-align:left;border:none;background:none" onclick="pick('{{ $c->key }}','{{ $c->name }}','{{ $c->channel }}')">
           <span style="flex:1"><b style="font-size:13px">{{ $c->name }}</b>
             <div class="mono" style="font-size:10px;color:var(--ink-3)">{{ $c->key }}</div></span>
           <span class="tag {{ $c->channel==='web'?'tag-blue':($c->channel==='desktop'?'tag-purple':'tag-green') }}">{{ $c->channel }}</span></button>

@@ -12,7 +12,7 @@
   <table><thead><tr><th>Name</th><th>Role</th><th>Head</th><th>Blocks</th><th>Joined</th><th>Status</th><th></th></tr></thead>
     <tbody>
     @forelse($active as $e)
-      <tr>
+      <tr id="emp-{{ $e->id }}">
         <td><div class="who-cell"><span class="avatar" style="width:28px;height:28px;font-size:10px">{{ $e->initials() }}</span>
           <span><b>{{ $e->name }}</b><span>{{ $e->slug }}</span></span></div></td>
         <td>{{ $e->role }}</td>
